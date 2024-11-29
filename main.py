@@ -5,7 +5,7 @@ from organizer import (
     create_movie_folder,
     move_file_to_movie_folder,
 )
-from metadata import update_metadata
+from metadata import update_metadata, toggle_watched_status
 from search import search_movies
 import argparse
 
@@ -68,6 +68,11 @@ def main():
         "--search",
         metavar="QUERY",
         help="Search for movies by name (case-insensitive, partial match).",
+    )
+    parser.add_argument(
+        "--toggle-watched",
+        metavar="MOVIE_NAME",
+        help="Toggle the watched/unwatched status of a movie in the metadata.",
     )
 
     args = parser.parse_args()
@@ -134,6 +139,16 @@ def main():
         except FileNotFoundError as e:
             print(e)
 
+    elif args.toggle_watched:
+        root = get_root_folder()
+        if not root:
+            print("Root folder is not set. Use '--set-root <path>' to set it.")
+            return
+        if not os.path.exists(root):
+            print(f"Root folder '{root}' does not exist.")
+            return
+        toggle_watched_status(root, args.toggle_watched)
+
     elif args.search:
         root = get_root_folder()
         if not root:
@@ -142,7 +157,6 @@ def main():
         if not os.path.exists(root):
             print(f"Root folder '{root}' does not exist.")
             return
-
         results = search_movies(root, args.search)
         if results:
             print(f"Search results for '{args.search}':")
