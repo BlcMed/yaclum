@@ -4,8 +4,10 @@ from organizer import (
     create_director_folder,
     create_movie_folder,
     move_file_to_movie_folder,
-    update_metadata,
 )
+from metadata import update_metadata
+from search import search_movies
+import argparse
 
 
 CONFIG_FILE = os.path.expanduser("~/.config/yaclum.conf")
@@ -41,7 +43,6 @@ def get_root_folder():
 
 
 def main():
-    import argparse
 
     parser = argparse.ArgumentParser(description="Yaclum: Your movie organizer CLI")
     parser.add_argument("--set-root", type=str, help="Set the root folder for movies")
@@ -62,6 +63,11 @@ def main():
         "--update-metadata",
         action="store_true",
         help="Update the metadata file by scanning the directory structure and adding new movies.",
+    )
+    parser.add_argument(
+        "--search",
+        metavar="QUERY",
+        help="Search for movies by name (case-insensitive, partial match).",
     )
 
     args = parser.parse_args()
@@ -128,8 +134,25 @@ def main():
         except FileNotFoundError as e:
             print(e)
 
+    elif args.search:
+        root = get_root_folder()
+        if not root:
+            print("Root folder is not set. Use '--set-root <path>' to set it.")
+            return
+        if not os.path.exists(root):
+            print(f"Root folder '{root}' does not exist.")
+            return
+
+        results = search_movies(root, args.search)
+        if results:
+            print(f"Search results for '{args.search}':")
+            for result in results:
+                watched_status = "Watched" if result["watched"] else "Unwatched"
+                print(
+                    f"  - {result['movie']} (Director: {result['director']}, {watched_status})"
+                )
         else:
-            print("No matching movies found.")
+            print(f"No results found for '{args.search}'.")
 
     else:
         parser.print_help()
