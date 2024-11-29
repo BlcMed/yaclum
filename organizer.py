@@ -1,5 +1,62 @@
 import os
 import shutil
+import json
+
+
+def update_metadata(root_folder):
+    """
+    Update the metadata file by adding any new movies from the directory structure
+    without overwriting existing entries or changing their watched status.
+    """
+    metadata_file = os.path.join(root_folder, "yaclum.json")
+
+    # Load existing metadata or initialize it as an empty dictionary
+    if os.path.exists(metadata_file):
+        with open(metadata_file, "r") as f:
+            metadata = json.load(f)
+        print("Loaded existing metadata.")
+    else:
+        metadata = {}
+        print("No metadata file found. Creating a new one.")
+
+    updated = False
+
+    # Traverse the directory structure
+    for director in os.listdir(root_folder):
+        director_path = os.path.join(root_folder, director)
+        if os.path.isdir(director_path):
+            if director not in metadata:
+                metadata[director] = {}  # Add new director
+                updated = True
+
+            for movie in os.listdir(director_path):
+                movie_path = os.path.join(director_path, movie)
+                if os.path.isdir(movie_path):
+                    if movie not in metadata[director]:
+                        metadata[director][movie] = {
+                            "watched": False
+                        }  # Default to unwatched
+                        updated = True
+
+    # Save updated metadata only if there are changes
+    if updated:
+        with open(metadata_file, "w") as f:
+            json.dump(metadata, f, indent=4)
+        print(f"Metadata updated and saved to {metadata_file}.")
+    else:
+        print("No new movies or directors to add. Metadata is already up to date.")
+
+
+def load_metadata(root_folder):
+    """
+    Load movie metadata (watched/unwatched status).
+    Returns a dictionary of metadata.
+    """
+    metadata_file = os.path.join(root_folder, "yaclum.json")
+    if os.path.exists(metadata_file):
+        with open(metadata_file, "r") as f:
+            return json.load(f)
+    return {}
 
 
 def create_director_folder(root_folder, director_name):

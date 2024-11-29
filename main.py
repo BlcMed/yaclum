@@ -4,9 +4,10 @@ from organizer import (
     create_director_folder,
     create_movie_folder,
     move_file_to_movie_folder,
+    update_metadata,
 )
 
-# Configuration file path
+
 CONFIG_FILE = os.path.expanduser("~/.config/yaclum.conf")
 
 
@@ -57,11 +58,27 @@ def main():
         metavar=("SOURCE", "DIRECTOR", "MOVIE"),
         help="Move a file to the specified director and movie folder",
     )
+    parser.add_argument(
+        "--update-metadata",
+        action="store_true",
+        help="Update the metadata file by scanning the directory structure and adding new movies.",
+    )
 
     args = parser.parse_args()
 
     if args.set_root:
         set_root_folder(args.set_root)
+
+    elif args.update_metadata:
+        root = get_root_folder()
+        if not root:
+            print("Root folder is not set. Use '--set-root <path>' to set it.")
+            return
+        if not os.path.exists(root):
+            print(f"Root folder '{root}' does not exist.")
+            return
+
+        update_metadata(root)
 
     elif args.list_movies:
         root = get_root_folder()
@@ -110,6 +127,9 @@ def main():
             move_file_to_movie_folder(root, source, director, movie)
         except FileNotFoundError as e:
             print(e)
+
+        else:
+            print("No matching movies found.")
 
     else:
         parser.print_help()
