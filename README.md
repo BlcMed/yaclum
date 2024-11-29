@@ -1,6 +1,6 @@
-# Yet Another Command-Line Utility for Movies (Yaclum)
+# Yet Another Command-Line Utility for Movies (YACLUM)
 
-**Yaclum** is a simple and efficient command-line utility designed to help you organize your movie collection. It supports managing movies and their metadata (watched/unwatched status), searching for movies, and maintaining a structured directory layout based on directors and their works.
+**YACLUM** is a simple and efficient command-line utility designed to help you organize your movie collection. It supports managing movies and their metadata (watched/unwatched status), searching for movies, and maintaining a structured directory layout based on directors and their works.
 
 ---
 
